@@ -1,6 +1,7 @@
 import UIKit
 
 /// DSL for AutoLayout
+// Protocol defining methods for creating constraints related to layout anchors
 protocol LayoutAnchor {
 
     func constraint(equalTo anchor: Self, constant: CGFloat) -> NSLayoutConstraint
@@ -8,6 +9,7 @@ protocol LayoutAnchor {
     func constraint(lessThanOrEqualTo anchor: Self, constant: CGFloat) -> NSLayoutConstraint
 }
 
+// Protocol extending LayoutAnchor to include methods for dimension constraints
 protocol LayoutDimension: LayoutAnchor {
 
     func constraint(equalToConstant constant: CGFloat) -> NSLayoutConstraint
@@ -17,9 +19,11 @@ protocol LayoutDimension: LayoutAnchor {
     func constraint(equalTo anchor: Self, multiplier: CGFloat) -> NSLayoutConstraint
 }
 
+// Extend NSLayoutAnchor and NSLayoutDimension to conform to custom protocols
 extension NSLayoutAnchor: LayoutAnchor {}
 extension NSLayoutDimension: LayoutDimension {}
 
+// Class representing a layout property associated with a specific layout anchor
 class LayoutProperty<Anchor: LayoutAnchor> {
 
     fileprivate let anchor: Anchor
@@ -33,17 +37,18 @@ class LayoutProperty<Anchor: LayoutAnchor> {
     }
 }
 
+// Subclass of LayoutProperty specifically for dimension properties (width, height)
 class LayoutAttribute<Dimension: LayoutDimension>: LayoutProperty<Dimension> {
 
     fileprivate let dimension: Dimension
 
     init(dimension: Dimension, kind: Kind) {
         self.dimension = dimension
-
-    super.init(anchor: dimension, kind: kind)
+        super.init(anchor: dimension, kind: kind)
     }
 }
 
+// Class to provide lazy-initialized layout properties for a UIView
 final class LayoutProxy {
 
     lazy var leading = property(with: view.leadingAnchor, kind: .leading)
@@ -61,15 +66,18 @@ final class LayoutProxy {
         self.view = view
     }
 
+    // Helper method to create a LayoutProperty for a given anchor
     private func property<A: LayoutAnchor>(with anchor: A, kind: LayoutProperty<A>.Kind) -> LayoutProperty<A> {
         return LayoutProperty(anchor: anchor, kind: kind)
     }
 
+    // Helper method to create a LayoutAttribute for a given dimension
     private func attribute<D: LayoutDimension>(with dimension: D, kind: LayoutProperty<D>.Kind) -> LayoutAttribute<D> {
         return LayoutAttribute(dimension: dimension, kind: kind)
     }
 }
 
+// Extension to add methods for setting constraints on LayoutAttribute instances
 extension LayoutAttribute {
 
     @discardableResult
@@ -115,6 +123,7 @@ extension LayoutAttribute {
     }
 }
 
+// Extension to add methods for setting constraints on LayoutProperty instances
 extension LayoutProperty {
 
     @discardableResult
